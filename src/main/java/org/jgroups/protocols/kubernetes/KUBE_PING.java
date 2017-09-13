@@ -64,17 +64,17 @@ public class KUBE_PING extends Discovery {
       systemProperty="KUBERNETES_MASTER_PROTOCOL")
     protected String  masterProtocol="https";
 
-    @Property(description="The URL of the Kubernetes server", systemProperty="KUBERNETES_SERVICE_HOST")
-    protected String  masterHost;
+    @Property(description="The URL of the Kubernetes server", systemProperty="KUBERNETES_MASTER_HOST")
+    protected String  masterHost="devops";
 
-    @Property(description="The port on which the Kubernetes server is listening", systemProperty="KUBERNETES_SERVICE_PORT")
-    protected int     masterPort;
+    @Property(description="The port on which the Kubernetes server is listening", systemProperty="KUBERNETES_MASTER_PORT")
+    protected int     masterPort=8443;
 
     @Property(description="The version of the protocol to the Kubernetes server", systemProperty="KUBERNETES_API_VERSION")
     protected String  apiVersion="v1";
 
     @Property(description="namespace", systemProperty="KUBERNETES_NAMESPACE")
-    protected String  namespace="default";
+    protected String  namespace = "default";
 
     @Property(description="The labels to use in the discovery request to the Kubernetes server",
       systemProperty="KUBERNETES_LABELS")
@@ -134,6 +134,8 @@ public class KUBE_PING extends Discovery {
     public void init() throws Exception {
         super.init();
 
+        log.info("init()");
+
         TP transport=getTransport();
         tp_bind_port=transport.getBindPort();
         if(tp_bind_port <= 0)
@@ -177,6 +179,8 @@ public class KUBE_PING extends Discovery {
         List<PhysicalAddress> cluster_members=new ArrayList<>(hosts != null? hosts.size() : 16);
         PhysicalAddress       physical_addr=null;
         PingData              data=null;
+
+        log.info("findMembers()");
 
         if(!use_ip_addrs || !initial_discovery) {
             physical_addr=(PhysicalAddress)down(new Event(Event.GET_PHYSICAL_ADDRESS, local_addr));
@@ -267,6 +271,7 @@ public class KUBE_PING extends Discovery {
 
 
     protected List<Pod> readAll() {
+        log.info("readAll() { get all pods }");
         if(isClusteringEnabled() && client != null) {
             try {
                 return client.getPods(namespace, labels, dump_requests);
