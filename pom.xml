@@ -3,7 +3,7 @@
 
     <groupId>org.jgroups.kubernetes</groupId>
     <artifactId>jgroups-kubernetes</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.4.RELEASE</version>
     <packaging>jar</packaging>
     <name>KUBE_PING</name>
     <url>https://github.com/jgroups-extras/jgroups-kubernetes</url>
@@ -72,13 +72,14 @@
 
     <distributionManagement>
         <repository>
-            <id>${nexus.server.id}</id>
-            <name>JBoss Releases Repository</name>
-            <url>${nexus.server.url}</url>
+            <id>nexus-releases</id>
+            <name>Nexus Release Repository</name>
+            <url>${nexus.releases}</url>
         </repository>
         <snapshotRepository>
-            <id>${nexus.snapshot.server.id}</id>
-            <url>${nexus.snapshot.server.url}</url>
+            <id>nexus-snapshots</id>
+            <name>Nexus Snapshot Repository</name>
+            <url>${nexus.snapshots}</url>
         </snapshotRepository>
     </distributionManagement>
 
