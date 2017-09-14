@@ -60,6 +60,10 @@ public class KUBE_PING extends Discovery {
     @Property(description="Time (in millis) between operation attempts", systemProperty="KUBERNETES_OPERATION_SLEEP")
     protected long   operationSleep=1000;
 
+    @Property(description="The FULL URL of the Kubernetes server. Used to send the initial discovery request to the Kubernetes server",
+      systemProperty="KUBERNETES_MASTER_URL")
+    protected String  masterUrl = null;
+
     @Property(description="https (default) or http. Used to send the initial discovery request to the Kubernetes server",
       systemProperty="KUBERNETES_MASTER_PROTOCOL")
     protected String  masterProtocol="https";
@@ -163,7 +167,10 @@ public class KUBE_PING extends Discovery {
             }
             streamProvider=new InsecureStreamProvider();
         }
-        String url=String.format("%s://%s:%s/api/%s", masterProtocol, masterHost, masterPort, apiVersion);
+        if (null == masterUrl) {
+            masterUrl = String.format("%s://%s:%s", masterProtocol, masterHost, masterPort);
+        }
+        String url=String.format("%s/api/%s", masterUrl, apiVersion);
         client=new Client(url, headers, connectTimeout, readTimeout, operationAttempts, operationSleep, streamProvider, log);
         log.debug("KubePING configuration: " + toString());
     }
