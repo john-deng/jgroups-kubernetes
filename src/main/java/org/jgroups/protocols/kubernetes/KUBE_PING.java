@@ -276,9 +276,9 @@ public class KUBE_PING extends Discovery {
         return list.toString();
     }
 
-
     protected List<Pod> readAll() {
-        log.debug("readAll from namespace: {}, labels: {} ", namespace, labels);
+        log.debug("read all from Kubernetes %s for cluster [%s], namespace [%s], labels [%s]",
+                client.info(), cluster_name, namespace, labels);
         if(isClusteringEnabled() && client != null) {
             try {
                 return client.getPods(namespace, labels, dump_requests);
