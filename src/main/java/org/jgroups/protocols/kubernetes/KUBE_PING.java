@@ -187,7 +187,7 @@ public class KUBE_PING extends Discovery {
         PhysicalAddress       physical_addr=null;
         PingData              data=null;
 
-        log.info("findMembers()");
+        log.debug("findMembers()");
 
         if(!use_ip_addrs || !initial_discovery) {
             physical_addr=(PhysicalAddress)down(new Event(Event.GET_PHYSICAL_ADDRESS, local_addr));
@@ -278,7 +278,7 @@ public class KUBE_PING extends Discovery {
 
 
     protected List<Pod> readAll() {
-        log.info("readAll() { get all pods }");
+        log.debug("readAll from namespace: {}, labels: {} ", namespace, labels);
         if(isClusteringEnabled() && client != null) {
             try {
                 return client.getPods(namespace, labels, dump_requests);
