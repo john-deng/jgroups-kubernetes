@@ -78,7 +78,7 @@ public class KUBE_PING extends Discovery {
     protected String  apiVersion="v1";
 
     @Property(description="namespace", systemProperty="KUBERNETES_NAMESPACE")
-    protected String  namespace = "default";
+    protected String  namespace = null;
 
     @Property(description="The labels to use in the discovery request to the Kubernetes server",
       systemProperty="KUBERNETES_LABELS")
@@ -145,12 +145,7 @@ public class KUBE_PING extends Discovery {
         if(tp_bind_port <= 0)
             throw new IllegalArgumentException(String.format("%s only works with  %s.bind_port > 0",
                                                              KUBE_PING.class.getSimpleName(), transport.getClass().getSimpleName()));
-
-        if(namespace == null) {
-            log.warn("namespace not set; clustering disabled");
-            return; // no further initialization necessary
-        }
-        log.info("namespace %s set; clustering enabled", namespace);
+        log.info("namespace (%s) set; clustering enabled", namespace);
         Map<String,String> headers=new HashMap<>();
         StreamProvider streamProvider;
         if(clientCertFile != null) {
@@ -279,7 +274,7 @@ public class KUBE_PING extends Discovery {
     protected List<Pod> readAll() {
         log.debug("read all from Kubernetes %s for cluster [%s], namespace [%s], labels [%s]",
                 client.info(), cluster_name, namespace, labels);
-        if(isClusteringEnabled() && client != null) {
+        if(client != null) {
             try {
                 return client.getPods(namespace, labels, dump_requests);
             }
