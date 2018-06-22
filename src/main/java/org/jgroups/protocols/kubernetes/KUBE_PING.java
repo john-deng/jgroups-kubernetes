@@ -69,10 +69,10 @@ public class KUBE_PING extends Discovery {
     protected String  masterProtocol="https";
 
     @Property(description="The URL of the Kubernetes server", systemProperty="KUBERNETES_MASTER_HOST")
-    protected String  masterHost="devops";
+    protected String  masterHost="";
 
     @Property(description="The port on which the Kubernetes server is listening", systemProperty="KUBERNETES_MASTER_PORT")
-    protected int     masterPort=8443;
+    protected int     masterPort=443;
 
     @Property(description="The version of the protocol to the Kubernetes server", systemProperty="KUBERNETES_API_VERSION")
     protected String  apiVersion="v1";
@@ -162,7 +162,9 @@ public class KUBE_PING extends Discovery {
             }
             streamProvider=new InsecureStreamProvider();
         }
+        labels = System.getenv("KUBERNETES_LABELS");
         String masterHost = System.getenv("KUBERNETES_SERVICE_HOST");
+        String masterPort = System.getenv("KUBERNETES_SERVICE_PORT");
         if (null == masterUrl && masterHost != null) {
             masterUrl = String.format("%s://%s:%s", masterProtocol, masterHost, masterPort);
         }
@@ -183,7 +185,7 @@ public class KUBE_PING extends Discovery {
         PhysicalAddress       physical_addr=null;
         PingData              data=null;
 
-        log.info("findMembers()");
+        log.debug("findMembers()");
 
         if(!use_ip_addrs || !initial_discovery) {
             physical_addr=(PhysicalAddress)down(new Event(Event.GET_PHYSICAL_ADDRESS, local_addr));
@@ -244,6 +246,7 @@ public class KUBE_PING extends Discovery {
                 log.warn("split_clusters_during_rolling_update is set to 'true' but can't obtain local node IP address. All nodes will be placed in the same cluster.");
             }
         }
+
         if(log.isTraceEnabled())
             log.trace("%s: sending discovery requests to %s", local_addr, cluster_members);
         PingHeader hdr=new PingHeader(PingHeader.GET_MBRS_REQ).clusterName(cluster_name).initialDiscovery(initial_discovery);
@@ -271,11 +274,10 @@ public class KUBE_PING extends Discovery {
         return list.toString();
     }
 
-
     protected List<Pod> readAll() {
-        labels = System.getenv("KUBERNETES_LABELS");
-        log.info("readAll() { get all pods }");
-        if(isClusteringEnabled() && client != null && labels != null) {
+        log.debug("read all from Kubernetes %s for cluster [%s], namespace [%s], labels [%s]",
+                client.info(), cluster_name, namespace, labels);
+        if(client != null) {
             try {
                 return client.getPods(namespace, labels, dump_requests);
             }
@@ -298,7 +300,6 @@ public class KUBE_PING extends Discovery {
 
     @Override
     public String toString() {
-        labels = System.getenv("KUBERNETES_LABELS");
         return String.format("KubePing{namespace='%s', labels='%s'}", namespace, labels);
     }
 
