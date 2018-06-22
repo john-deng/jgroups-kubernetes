@@ -78,7 +78,7 @@ public class KUBE_PING extends Discovery {
     protected String  apiVersion="v1";
 
     @Property(description="namespace", systemProperty="KUBERNETES_NAMESPACE")
-    protected String  namespace = "default";
+    protected String  namespace = null;
 
     @Property(description="The labels to use in the discovery request to the Kubernetes server",
       systemProperty="KUBERNETES_LABELS")
@@ -145,12 +145,7 @@ public class KUBE_PING extends Discovery {
         if(tp_bind_port <= 0)
             throw new IllegalArgumentException(String.format("%s only works with  %s.bind_port > 0",
                                                              KUBE_PING.class.getSimpleName(), transport.getClass().getSimpleName()));
-
-        if(namespace == null) {
-            log.warn("namespace not set; clustering disabled");
-            return; // no further initialization necessary
-        }
-        log.info("namespace %s set; clustering enabled", namespace);
+        log.info("namespace (%s) set; clustering enabled", namespace);
         Map<String,String> headers=new HashMap<>();
         StreamProvider streamProvider;
         if(clientCertFile != null) {
@@ -167,7 +162,8 @@ public class KUBE_PING extends Discovery {
             }
             streamProvider=new InsecureStreamProvider();
         }
-        if (null == masterUrl) {
+        String masterHost = System.getenv("KUBERNETES_SERVICE_HOST");
+        if (null == masterUrl && masterHost != null) {
             masterUrl = String.format("%s://%s:%s", masterProtocol, masterHost, masterPort);
         }
         String url=String.format("%s/api/%s", masterUrl, apiVersion);
@@ -248,7 +244,6 @@ public class KUBE_PING extends Discovery {
                 log.warn("split_clusters_during_rolling_update is set to 'true' but can't obtain local node IP address. All nodes will be placed in the same cluster.");
             }
         }
-
         if(log.isTraceEnabled())
             log.trace("%s: sending discovery requests to %s", local_addr, cluster_members);
         PingHeader hdr=new PingHeader(PingHeader.GET_MBRS_REQ).clusterName(cluster_name).initialDiscovery(initial_discovery);
@@ -278,8 +273,9 @@ public class KUBE_PING extends Discovery {
 
 
     protected List<Pod> readAll() {
+        labels = System.getenv("KUBERNETES_LABELS");
         log.info("readAll() { get all pods }");
-        if(isClusteringEnabled() && client != null) {
+        if(isClusteringEnabled() && client != null && labels != null) {
             try {
                 return client.getPods(namespace, labels, dump_requests);
             }
@@ -302,6 +298,7 @@ public class KUBE_PING extends Discovery {
 
     @Override
     public String toString() {
+        labels = System.getenv("KUBERNETES_LABELS");
         return String.format("KubePing{namespace='%s', labels='%s'}", namespace, labels);
     }
 

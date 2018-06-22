@@ -69,8 +69,6 @@ public class Client {
         }
     }
 
-
-
     public List<Pod> getPods(String namespace, String labels, boolean dump_requests) throws Exception {
         String result=fetchFromKubernetes("pods", namespace, labels, dump_requests);
         if(result == null)
