@@ -69,10 +69,10 @@ public class KUBE_PING extends Discovery {
     protected String  masterProtocol="https";
 
     @Property(description="The URL of the Kubernetes server", systemProperty="KUBERNETES_MASTER_HOST")
-    protected String  masterHost="devops";
+    protected String  masterHost="";
 
     @Property(description="The port on which the Kubernetes server is listening", systemProperty="KUBERNETES_MASTER_PORT")
-    protected int     masterPort=8443;
+    protected int     masterPort=443;
 
     @Property(description="The version of the protocol to the Kubernetes server", systemProperty="KUBERNETES_API_VERSION")
     protected String  apiVersion="v1";
@@ -162,7 +162,10 @@ public class KUBE_PING extends Discovery {
             }
             streamProvider=new InsecureStreamProvider();
         }
-        if (null == masterUrl) {
+        labels = System.getenv("KUBERNETES_LABELS");
+        String masterHost = System.getenv("KUBERNETES_SERVICE_HOST");
+        String masterPort = System.getenv("KUBERNETES_SERVICE_PORT");
+        if (null == masterUrl && masterHost != null) {
             masterUrl = String.format("%s://%s:%s", masterProtocol, masterHost, masterPort);
         }
         String url=String.format("%s/api/%s", masterUrl, apiVersion);
