@@ -244,8 +244,7 @@ public class KUBE_PING extends Discovery {
                 log.warn("split_clusters_during_rolling_update is set to 'true' but can't obtain local node IP address. All nodes will be placed in the same cluster.");
             }
         }
-        cluster_name = System.getenv("KUBERNETES_CLUSTER_NAME");
-        if(log.isTraceEnabled() && cluster_name != null)
+        if(log.isTraceEnabled())
             log.trace("%s: sending discovery requests to %s", local_addr, cluster_members);
         PingHeader hdr=new PingHeader(PingHeader.GET_MBRS_REQ).clusterName(cluster_name).initialDiscovery(initial_discovery);
         for(final PhysicalAddress addr: cluster_members) {
@@ -275,9 +274,8 @@ public class KUBE_PING extends Discovery {
 
     protected List<Pod> readAll() {
         labels = System.getenv("KUBERNETES_LABELS");
-        cluster_name = System.getenv("KUBERNETES_CLUSTER_NAME");
         log.info("readAll() { get all pods }");
-        if(isClusteringEnabled() && client != null && labels != null && cluster_name != null) {
+        if(isClusteringEnabled() && client != null && labels != null) {
             try {
                 return client.getPods(namespace, labels, dump_requests);
             }
